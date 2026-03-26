@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>Hacker Prank</title>
+
+<style>
+body{
+  margin:0;
+  background:black;
+  color:lime;
+  font-family:Courier New, monospace;
+  text-align:center;
+}
+
+h1{color:red;margin-top:20px}
+
+#timer{
+  font-size:48px;
+  margin:20px 0;
+}
+
+#storyText{
+  width:80%;
+  margin:0 auto;
+  color:red;
+  line-height:1.5;
+}
+
+#answerBox{
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  margin:20px 0;
+}
+
+.letterBox{
+  width:40px;
+  height:40px;
+  font-size:22px;
+  text-align:center;
+  border:2px solid lime;
+  background:black;
+  color:lime;
+}
+
+button{
+  padding:8px 20px;
+  background:black;
+  color:lime;
+  border:2px solid lime;
+  cursor:pointer;
+}
+
+.modal{
+  display:none;
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:black;
+  color:lime;
+  border:2px solid red;
+  padding:20px;
+  width:320px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>AKKAUNTNI BUZISH ISHLARI BOSHLANDI</h1>
+
+<div id="timer">24:00:00</div>
+
+<div id="storyText">
+Siz tuzoqqa tushdingiz endi sizning akkauntingiz 24 soatdan so‘ng o‘g‘irlanadi.<br>
+Akkauntni saqlab qilish uchun siz savolga javob berishingiz kerak.<br>
+Savolga javob berishingiz uchun sizga yordam beriladi.<br><br>
+
+Hullas yaxshilab o‘ylang:<br>
+U bu ishni sizdan oldin boshlagan, u sizdan ko‘pdir,<br>
+garchi u sizdan keyin tug‘ilgan bo‘lsa ham bu ishda u sizdan ham mahoratlidir,<br>
+uning yangi ismini siz topgansiz garchi hozirda u ism boshqa bo‘lsa ham.<br><br>
+
+Diqqat savol: gap sizning kimiz haqida ketyapti.
+</div>
+
+<div id="answerBox"></div>
+
+<button onclick="checkAnswer()">Tekshirish</button>
+
+<!-- Modallar -->
+<div id="wrongModal" class="modal">
+Javob xato!
+<br><br>
+<button onclick="closeModal('wrongModal')">OK</button>
+</div>
+
+<div id="helpModal" class="modal">
+Javob xato!<br><br>
+Yordam: U siz bilan bitta joyda yashagan va siz bilan ishlashni 2024-yil iyul oyida boshlagan.
+<br><br>
+<button onclick="closeModal('helpModal')">OK</button>
+</div>
+
+<div id="hackedModal" class="modal">
+Siz xato javob berdingiz.<br>
+Akkauntingizga buzib kirildi.
+<br><br>
+<button onclick="closeHacked()">OK</button>
+</div>
+
+<div id="correctModal" class="modal">
+Tabriklaymiz! Akkauntingiz saqlandi.<br>
+Sovg‘ani olish uchun OK ni bosing.
+<br><br>
+<button onclick="closeCorrect()">OK</button>
+</div>
+
+<div id="prankSuccess" class="modal">
+Tabriklayman jura sen prankni yaxshilik bilan tugatding
+<br><br>
+<button onclick="closeModal('prankSuccess')">OK</button>
+</div>
+
+<div id="prankFail" class="modal">
+Jura bu men Omon. Senga bir prank qilgim keldida.<br>
+Prank qanday yoqdimi?
+<br><br>
+<button onclick="closeModal('prankFail')">OK</button>
+</div>
+
+<script>
+let answer = "OMOCRAFT PRIME";
+let answerBox = document.getElementById("answerBox");
+
+// Kataklar yaratish (space yo‘q)
+for(let i=0;i<answer.length;i++){
+  if(answer[i]===" ") continue;
+
+  let input=document.createElement("input");
+  input.className="letterBox";
+  input.maxLength=1;
+  input.dataset.index=i;
+  answerBox.appendChild(input);
+}
+
+// Auto move va backspace
+let inputs=document.querySelectorAll(".letterBox");
+
+inputs.forEach((input,index)=>{
+  input.addEventListener("input",()=>{
+    input.value=input.value.toUpperCase();
+    if(input.value && index<inputs.length-1){
+      inputs[index+1].focus();
+    }
+  });
+
+  input.addEventListener("keydown",(e)=>{
+    if(e.key==="Backspace" && !input.value && index>0){
+      inputs[index-1].focus();
+    }
+  });
+});
+
+// Taymer
+let totalSeconds = 24*3600;
+let timerDisplay = document.getElementById("timer");
+
+function updateTimer(){
+  if(totalSeconds<=0){
+    totalSeconds=0;
+    clearInterval(timerInterval);
+  }
+
+  let h=Math.floor(totalSeconds/3600);
+  let m=Math.floor((totalSeconds%3600)/60);
+  let s=totalSeconds%60;
+
+  timerDisplay.textContent =
+  String(h).padStart(2,'0')+":"+
+  String(m).padStart(2,'0')+":"+
+  String(s).padStart(2,'0');
+
+  totalSeconds--;
+}
+
+let timerInterval = setInterval(updateTimer,1000);
+
+// Javob tekshirish
+let mistakes=0;
+
+function checkAnswer(){
+  let userArray=answer.split("");inputs.forEach(inp=>{
+    userArray[inp.dataset.index]=inp.value.toUpperCase();
+  });
+
+  let userAnswer=userArray.join("");
+
+  if(userAnswer===answer){
+    clearInterval(timerInterval);
+    showModal("correctModal");
+    return;
+  }
+
+  mistakes++;
+
+  if(mistakes===1){
+    totalSeconds=5*3600;
+    showModal("wrongModal");
+  }
+  else if(mistakes===2){
+    totalSeconds=1*3600;
+    showModal("wrongModal");
+  }
+  else if(mistakes===3){
+    totalSeconds=10*60;
+    showModal("helpModal");
+  }
+  else{
+    totalSeconds=0;
+    updateTimer();
+    clearInterval(timerInterval);
+    showModal("hackedModal");
+  }
+}
+
+// Modal funksiyalar
+function showModal(id){
+  document.getElementById(id).style.display="block";
+}
+
+function closeModal(id){
+  document.getElementById(id).style.display="none";
+}
+
+function closeCorrect(){
+  closeModal("correctModal");
+  showModal("prankSuccess");
+}
+
+function closeHacked(){
+  closeModal("hackedModal");
+  showModal("prankFail");
+}
+</script>
+
+</body>
+</html>
